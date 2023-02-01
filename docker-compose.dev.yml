@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo
+    volumes:
+      - type: volume
+        source: dbtest
+        target: /data/db
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+
+    ports:
+      - 3000:3000
+
+    volumes:
+      - type: bind
+        source: ./client
+        target: /app
+      - type: volume
+        target: /app/node_modules
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+
+    depends_on:
+      - db
+
+    volumes:
+      - type: bind
+        source: ./api/src
+        target: /app/src
+    expose:
+      - 3001
+    ports:
+      - 3001:80
+
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile.dev
+    expose:
+      - 80
+    ports:
+      - 80:80
+
+    depends_on:
+      - db
+      - api
+      - client
+
+volumes:
+  dbtest:
+    external: true
