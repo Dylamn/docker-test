@@ -44,8 +44,17 @@ services:
     restart: unless-stopped
     expose:
       - 80
+      - 443
     ports:
       - 80:80
+      - 443:443
+    volumes:
+      # For SSL certificates, they must be in /etc/letsencrypt/live/docker-test
+      # This path can be changed in the `prod.conf` file within the `reverse-proxy/conf` directory (e.g. **/*/www.my-website.com/*.pem).
+      # Do not forget to change the starting path below too in order to have the same both here and in the `.conf`.
+      - type: bind
+        source: /etc/letsencrypt
+        target: /etc/letsencrypt
 
 volumes:
   dbprod:
